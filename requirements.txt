@@ -4,3 +4,4 @@ bs4
 lxml
 html5lib
 chromedriver-autoinstaller
+google-generativeai
