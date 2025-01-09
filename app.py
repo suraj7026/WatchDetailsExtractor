@@ -1,11 +1,20 @@
 import streamlit as st
+import os, sys
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import FirefoxOptions
 from bs4 import BeautifulSoup
 import time
 import google.generativeai as genai
-import chromedriver_autoinstaller
+
+st.set_page_config(layout="wide", page_title="Rolex Watch Details Extractor")
+
+
+@st.cache_resource
+def installff():
+    os.system('sbase install geckodriver')
+    os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
+
+_ = installff()
 
 def extract_details_with_gemini(text, api_key="AIzaSyB9dSYe3H16e3PV-4ol7n-IydclXw3PiAY"):
     genai.configure(api_key=api_key)
@@ -42,26 +51,17 @@ def extract_details_with_gemini(text, api_key="AIzaSyB9dSYe3H16e3PV-4ol7n-IydclX
 # Function to extract webpage text with Selenium
 def extract_text_with_selenium(url, proxy=None):
     try:
-        # Automatically install the appropriate ChromeDriver version
-        chromedriver_autoinstaller.install()
-
-        chrome_options = Options()
-        chrome_options.add_argument(
-            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        )
-        chrome_options.add_argument("--headless")  # Run in headless mode for deployment
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        opts = FirefoxOptions()
+        opts.add_argument("--headless")  # Run in headless mode
 
         if proxy:
-            chrome_options.add_argument(f'--proxy-server={proxy}')
+            opts.add_argument(f'--proxy-server={proxy}')
 
-        driver = webdriver.Chrome(options=chrome_options)
+        browser = webdriver.Firefox(options=opts)
 
-        driver.get(url)
-        driver.implicitly_wait(10)
+        browser.get(url)
         time.sleep(2)
-        page_source = driver.page_source
+        page_source = browser.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
         text = soup.get_text(separator=' ', strip=True)
         return text
@@ -71,12 +71,11 @@ def extract_text_with_selenium(url, proxy=None):
         return None
 
     finally:
-        driver.quit()
+        browser.quit()
 
 # Streamlit App
 def main():
     # Set wide page layout
-    st.set_page_config(layout="wide", page_title="Rolex Watch Details Extractor")
 
     # Sidebar for proxy
     proxy = st.sidebar.text_input("Optional: Enter proxy server (e.g., http://proxy-server:port)")
