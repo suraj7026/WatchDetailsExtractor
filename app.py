@@ -11,29 +11,47 @@ st.set_page_config(layout="wide", page_title="Rolex Watch Details Extractor")
 @st.cache_resource
 def installff():
     try:
-        # Install Firefox and dependencies
-        os.system("apt-get update && apt-get install -y firefox-esr")
-        os.system("apt-get install -y libgtk-3-0 libdbus-glib-1-2 libasound2 libnss3 libx11-xcb1")
+        st.write("Installing Firefox and dependencies...")
+        firefox_install = os.system("apt-get update && apt-get install -y firefox-esr")
+        dependencies_install = os.system("apt-get install -y libgtk-3-0 libdbus-glib-1-2 libasound2 libnss3 libx11-xcb1")
+        if firefox_install != 0 or dependencies_install != 0:
+            raise Exception("Failed to install Firefox or its dependencies.")
 
-        # Install geckodriver
+        st.write("Installing Geckodriver...")
         os.system("wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz")
         os.system("tar -xvzf geckodriver-v0.33.0-linux64.tar.gz -C /usr/local/bin/")
         os.system("rm geckodriver-v0.33.0-linux64.tar.gz")
 
-        # Verify installations
+        st.write("Verifying Firefox installation...")
         firefox_version = os.popen("firefox --version").read()
-        geckodriver_version = os.popen("geckodriver --version").read()
         st.write(f"Firefox version: {firefox_version}")
-        st.write(f"Geckodriver version: {geckodriver_version}")
+        if not firefox_version.strip():
+            raise Exception("Firefox verification failed. No version output detected.")
 
-        if not firefox_version or not geckodriver_version:
-            raise Exception("Failed to verify Firefox or Geckodriver installation.")
+        st.write("Verifying Geckodriver installation...")
+        geckodriver_version = os.popen("geckodriver --version").read()
+        st.write(f"Geckodriver version: {geckodriver_version}")
+        if not geckodriver_version.strip():
+            raise Exception("Geckodriver verification failed. No version output detected.")
 
     except Exception as e:
-        st.error(f"Installation failed: {e}")
+        st.error(f"Error during setup: {e}")
         raise
 
+
+def debug_environment():
+    st.write("Environment Variables:")
+    st.write(os.environ)
+    st.write("PATH:", os.environ.get("PATH"))
+    st.write("LD_LIBRARY_PATH:", os.environ.get("LD_LIBRARY_PATH"))
+    st.write("Installed Binaries:")
+    st.write(os.popen("ls /usr/local/bin").read())
+    st.write(os.popen("ls /usr/bin").read())
+
+
+debug_environment()
 _ = installff()
+
 
 def extract_details_with_gemini(text, api_key="AIzaSyB9dSYe3H16e3PV-4ol7n-IydclXw3PiAY"):
     genai.configure(api_key=api_key)
