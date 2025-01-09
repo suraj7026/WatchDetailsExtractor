@@ -10,20 +10,28 @@ st.set_page_config(layout="wide", page_title="Rolex Watch Details Extractor")
 
 @st.cache_resource
 def installff():
-    # Install Firefox and dependencies
-    os.system("apt-get update && apt-get install -y firefox-esr")
-    os.system("apt-get install -y libgtk-3-0 libdbus-glib-1-2 libasound2 libnss3 libx11-xcb1")
+    try:
+        # Install Firefox and dependencies
+        os.system("apt-get update && apt-get install -y firefox-esr")
+        os.system("apt-get install -y libgtk-3-0 libdbus-glib-1-2 libasound2 libnss3 libx11-xcb1")
 
-    # Install geckodriver
-    os.system("wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz")
-    os.system("tar -xvzf geckodriver-v0.33.0-linux64.tar.gz -C /usr/local/bin/")
-    os.system("rm geckodriver-v0.33.0-linux64.tar.gz")
+        # Install geckodriver
+        os.system("wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz")
+        os.system("tar -xvzf geckodriver-v0.33.0-linux64.tar.gz -C /usr/local/bin/")
+        os.system("rm geckodriver-v0.33.0-linux64.tar.gz")
 
-    # Verify installations
-    firefox_version = os.popen("firefox --version").read()
-    geckodriver_version = os.popen("geckodriver --version").read()
-    st.write(f"Firefox version: {firefox_version}")
-    st.write(f"Geckodriver version: {geckodriver_version}")
+        # Verify installations
+        firefox_version = os.popen("firefox --version").read()
+        geckodriver_version = os.popen("geckodriver --version").read()
+        st.write(f"Firefox version: {firefox_version}")
+        st.write(f"Geckodriver version: {geckodriver_version}")
+
+        if not firefox_version or not geckodriver_version:
+            raise Exception("Failed to verify Firefox or Geckodriver installation.")
+
+    except Exception as e:
+        st.error(f"Installation failed: {e}")
+        raise
 
 _ = installff()
 
