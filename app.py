@@ -12,12 +12,18 @@ st.set_page_config(layout="wide", page_title="Rolex Watch Details Extractor")
 def installff():
     # Install Firefox and dependencies
     os.system("apt-get update && apt-get install -y firefox-esr")
-    os.system("apt-get install -y libgtk-3-0 libdbus-glib-1-2")
+    os.system("apt-get install -y libgtk-3-0 libdbus-glib-1-2 libasound2 libnss3 libx11-xcb1")
 
     # Install geckodriver
     os.system("wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz")
     os.system("tar -xvzf geckodriver-v0.33.0-linux64.tar.gz -C /usr/local/bin/")
     os.system("rm geckodriver-v0.33.0-linux64.tar.gz")
+
+    # Verify installations
+    firefox_version = os.popen("firefox --version").read()
+    geckodriver_version = os.popen("geckodriver --version").read()
+    st.write(f"Firefox version: {firefox_version}")
+    st.write(f"Geckodriver version: {geckodriver_version}")
 
 _ = installff()
 
