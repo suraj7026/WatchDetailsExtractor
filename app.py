@@ -8,11 +8,16 @@ import google.generativeai as genai
 
 st.set_page_config(layout="wide", page_title="Rolex Watch Details Extractor")
 
-
 @st.cache_resource
 def installff():
-    os.system('sbase install geckodriver')
-    os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
+    # Install Firefox and dependencies
+    os.system("apt-get update && apt-get install -y firefox-esr")
+    os.system("apt-get install -y libgtk-3-0 libdbus-glib-1-2")
+
+    # Install geckodriver
+    os.system("wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz")
+    os.system("tar -xvzf geckodriver-v0.33.0-linux64.tar.gz -C /usr/local/bin/")
+    os.system("rm geckodriver-v0.33.0-linux64.tar.gz")
 
 _ = installff()
 
@@ -50,9 +55,13 @@ def extract_details_with_gemini(text, api_key="AIzaSyB9dSYe3H16e3PV-4ol7n-IydclX
 
 # Function to extract webpage text with Selenium
 def extract_text_with_selenium(url, proxy=None):
+    browser = None
     try:
         opts = FirefoxOptions()
         opts.add_argument("--headless")  # Run in headless mode
+        opts.add_argument("--no-sandbox")
+        opts.add_argument("--disable-dev-shm-usage")
+        opts.add_argument("--disable-gpu")
 
         if proxy:
             opts.add_argument(f'--proxy-server={proxy}')
@@ -71,12 +80,11 @@ def extract_text_with_selenium(url, proxy=None):
         return None
 
     finally:
-        browser.quit()
+        if browser:
+            browser.quit()
 
 # Streamlit App
 def main():
-    # Set wide page layout
-
     # Sidebar for proxy
     proxy = st.sidebar.text_input("Optional: Enter proxy server (e.g., http://proxy-server:port)")
 
