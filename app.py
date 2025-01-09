@@ -58,7 +58,7 @@ def extract_text_with_selenium(url, proxy=None):
     browser = None
     try:
         opts = FirefoxOptions()
-        opts.add_argument("--headless")  # Run in headless mode
+        opts.add_argument("-headless")  # Run in headless mode
         opts.add_argument("--no-sandbox")
         opts.add_argument("--disable-dev-shm-usage")
         opts.add_argument("--disable-gpu")
